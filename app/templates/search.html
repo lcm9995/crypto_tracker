@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+
+{% block title %}Search Cryptocurrencies{% endblock %}
+
+{% block content %}
+<h1>Search for Cryptocurrencies</h1>
+<form action="/results" method="GET">
+    <div class="mb-3">
+        <label for="crypto-query" class="form-label">Enter cryptocurrency name or symbol:</label>
+        <input type="text" id="crypto-query" name="query" class="form-control" required>
+    </div>
+    <button type="submit" class="btn btn-primary">Search</button>
+</form>
+{% endblock %}
+
+

@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block title %}Results{% endblock %}
+
+{% block content %}
+    <!-- "Search Again" Button at the Top -->
+    <div class="d-flex justify-content-end mb-3">
+        <a href="/search" class="btn btn-secondary">Search Again</a>
+    </div>
+
+    <h2>Search Results</h2>
+
+    {% if search_results %}
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Symbol</th>
+                    <th>Price (USD)</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for coin in search_results %}
+                    <tr>
+                        <td>{{ coin.name }}</td>
+                        <td>{{ coin.symbol }}</td>
+                        <td>${{ coin.price }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <div class="alert alert-warning">No results found for your search.</div>
+    {% endif %}
+{% endblock %}
+
+
+

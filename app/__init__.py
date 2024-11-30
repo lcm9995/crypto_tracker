@@ -15,6 +15,7 @@ def init_db():
         db = get_db()
         with open(os.path.join(os.path.dirname(__file__), 'schema.sql'), 'r') as f :
             db.executescript(f.read())
+        print("initializing db")
         db.commit()
         
 app = Flask(__name__)

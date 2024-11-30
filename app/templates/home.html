@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+
+{% block title %}Home - Crypto Tracker{% endblock %}
+
+{% block content %}
+<div class="text-center">
+    <h1>Welcome to Crypto Tracker</h1>
+    <p>Track cryptocurrency prices, manage your portfolio, and stay up to date with the latest news.</p>
+
+    <div class="row">
+        <div class="col-md-4">
+            <a href="/search" class="btn btn-primary btn-lg">Search Cryptocurrencies</a>
+        </div>
+        <div class="col-md-4">
+            <a href="/portfolio" class="btn btn-success btn-lg">My Portfolio</a>
+        </div>
+        <div class="col-md-4">
+            <a href="/login" class="btn btn-warning btn-lg">Login</a>
+        </div>
+    </div>
+    <button class="btn btn-secondary">Test Button</button>
+</div>
+{% endblock %}
+
+

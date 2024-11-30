@@ -1,0 +1,50 @@
+<!-- {% extends "base.html" %}
+
+{% block title %}Crypto Search{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2 class="mt-4">Search for Cryptocurrencies</h2>
+
+    <!-- Search Form -->
+    <form method="POST" class="mb-4">
+        <div class="input-group">
+            <input type="text" name="crypto_query" class="form-control" placeholder="Enter cryptocurrency name or symbol" required>
+            <button class="btn btn-primary" type="submit">Search</button>
+        </div>
+    </form>
+    <div class="mt-4">
+        <form method="GET">
+            <button class="btn btn-secondary" type="submit">Search Again</button>
+        </form>
+    </div>
+
+    {% if search_results %}
+        <h3>Search Results</h3>
+        <table class="table table-striped mt-3">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Symbol</th>
+                    <th>Price (USD)</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for coin in search_results %}
+                    <tr>
+                        <td>{{ coin.name }}</td>
+                        <td>{{ coin.symbol }}</td>
+                        <td>${{ coin.price }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <!-- "Search Again" Button -->
+
+    {% elif search_results is not none %}
+        <div class="alert alert-warning mt-3">No results found for your search.</div>
+    {% endif %}
+</div>
+{% endblock %}
+ -->

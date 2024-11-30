@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+
+{% block title %}Portfolio | Crypto Tracker{% endblock %}
+
+{% block content %}
+<h2>Your Portfolio</h2>
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Cryptocurrency</th>
+            <th>Quantity</th>
+            <th>Total Value (USD)</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for entry in portfolio %}
+        <tr>
+            <td>{{ entry.crypto_name }}</td>
+            <td>{{ entry.quantity }}</td>
+            <td>${{ entry.total_value }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+<a class="btn btn-primary" href="/add">Add New Entry</a>
+{% endblock %}
