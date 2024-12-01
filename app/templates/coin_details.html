@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+
+{% block title %}Coin Details{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <!-- Coin Title and Image -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>{{ coin_data['name'] }} ({{ coin_data['symbol'].upper() }})</h2>
+        <img src="{{ coin_data['image']['large'] }}" alt="{{ coin_data['name'] }}" class="img-fluid" style="max-width: 150px;">
+    </div>
+
+    <!-- Coin Details Card -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5>Coin Overview</h5>
+        </div>
+        <div class="card-body">
+            <p><strong>Market Cap:</strong> ${{ coin_data['market_data']['market_cap']['usd'] | round(2) }}</p>
+            <p><strong>Current Price:</strong> ${{ coin_data['market_data']['current_price']['usd'] | round(2) }}</p>
+            <p><strong>24h Change:</strong> <span class="{{ 'text-success' if coin_data['market_data']['price_change_percentage_24h'] > 0 else 'text-danger' }}">
+                {{ coin_data['market_data']['price_change_percentage_24h'] | round(2) }}%
+            </span></p>
+            <p><strong>Total Supply:</strong> {{ coin_data['market_data']['total_supply'] }}</p>
+        </div>
+    </div>
+
+    <!-- Historical Chart Data Section -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5>Price History (Last 7 Days)</h5>
+        </div>
+        <div class="card-body">
+            {% if historical_data %}
+                <!-- Pass data as JSON to a data-* attribute -->
+                <div id="historical-data" 
+                     data-historical="{{ historical_data['prices'] | tojson }}">
+                </div>
+                
+                <canvas id="priceChart"></canvas>
+                <script>
+                    // Get historical data from data attribute
+                    const historicalData = JSON.parse(document.getElementById('historical-data').getAttribute('data-historical'));
+
+                    const chartLabels = historicalData.map(data => {
+                        const date = new Date(data[0]);
+                        return date.toLocaleDateString();
+                    });
+
+                    const chartData = historicalData.map(data => data[1]);
+
+                    const ctx = document.getElementById('priceChart').getContext('2d');
+                    new Chart(ctx, {
+                        type: 'line',
+                        data: {
+                            labels: chartLabels,
+                            datasets: [{
+                                label: 'Price in USD',
+                                data: chartData,
+                                borderColor: 'rgba(75, 192, 192, 1)',
+                                borderWidth: 2,
+                                fill: false
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            scales: {
+                                x: { 
+                                    ticks: { autoSkip: true, maxTicksLimit: 7 },
+                                    title: { display: true, text: 'Date' }
+                                },
+                                y: { 
+                                    ticks: { beginAtZero: false },
+                                    title: { display: true, text: 'Price (USD)' }
+                                }
+                            }
+                        }
+                    });
+                </script>
+            {% else %}
+                <p>No historical data available for this coin.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Related Links or Additional Resources -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5>Resources</h5>
+        </div>
+        <div class="card-body">
+            <p><a href="https://www.coingecko.com/en/coins/{{ coin_data['id'] }}" target="_blank" class="btn btn-info">More Information on CoinGecko</a></p>
+        </div>
+    </div>
+</div>
+{% endblock %}

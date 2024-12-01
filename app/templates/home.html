@@ -6,19 +6,86 @@
 <div class="text-center">
     <h1>Welcome to Crypto Tracker</h1>
     <p>Track cryptocurrency prices, manage your portfolio, and stay up to date with the latest news.</p>
-
-    <div class="row">
-        <div class="col-md-4">
-            <a href="/search" class="btn btn-primary btn-lg">Search Cryptocurrencies</a>
-        </div>
-        <div class="col-md-4">
-            <a href="/portfolio" class="btn btn-success btn-lg">My Portfolio</a>
-        </div>
-        <div class="col-md-4">
-            <a href="/login" class="btn btn-warning btn-lg">Login</a>
+    <h2 class = "subheader">Coin Search</h2>
+    <div class="container mt-4">
+        <div class="row">
+            <!-- Subheader for Search Section -->
+            <!-- Search Form -->
+            <form action="/results" method="GET">
+                <div class="col-12 d-flex align-items-center">
+                    <label for="crypto-query" class="form-label">Enter cryptocurrency name or symbol:</label>
+                    <input type="text" id="crypto-query" name="query" class="form-control" required>
+                    <button type="submit" class="btn btn-primary" id = "searchButton">Search</button>
+                </div>
+            </form>
         </div>
     </div>
-    <button class="btn btn-secondary">Test Button</button>
+</div>
+    <h2 class="subheader">Market Trends</h2>
+    <!--<h1>Market Trends (By Category) </h1>-->
+
+    {% if trends %}
+    <div class="container">
+        <div class="row">
+            {% for trend in trends %}
+                <div class="col-md-4 mb-4">  <!-- Bootstrap grid, 3 cards per row on medium screens -->
+                    <div class="card h-100">
+                        <div class="card-body text-center">
+                            <h5 class="card-title">{{ trend.name }}</h5>
+                            
+                            <p class="card-text">
+                                <strong>Market Cap:</strong> 
+                                {% if trend.market_cap %}
+                                    ${{ '{:,.2f}'.format(trend.market_cap) }}
+                                {% else %}
+                                    Data not available
+                                {% endif %}
+                            </p>
+                            
+                            <p class="card-text">
+                                <strong>Market Cap Change (24h):</strong> 
+                                {% if trend.market_cap_change_24h is not none %}
+                                    <span class="{{ 'text-success' if trend.market_cap_change_24h >= 0 else 'text-danger' }}">
+                                        {{ trend.market_cap_change_24h | round(2) }}%
+                                    </span>
+                                {% else %}
+                                    Data not available
+                                {% endif %}
+                            </p>
+
+                            <p class="card-text">
+                                <strong>24h Volume:</strong> 
+                                {% if trend.volume_24h %}
+                                    ${{ '{:,.2f}'.format(trend.volume_24h) }}
+                                {% else %}
+                                    Data not available
+                                {% endif %}
+                            </p>
+
+                            <p class="card-text">
+                                <strong>Last Updated:</strong> {{ trend.updated_at }}
+                            </p>
+
+                            <h6>Top 3 Coins:</h6>
+                            <div class="d-flex justify-content-center">
+                                {% for i in range(3) %}
+                                    <div class="me-3">
+                                        <a href="https://www.coingecko.com/en/coins/{{ trend.top_3_coins_id[i] }}" target="_blank">
+                                            <img src="{{ trend.top_3_coins[i] }}" alt="{{ trend.top_3_coins_id[i] }}" width="50" height="50">
+                                        </a>
+                                        <p>{{ trend.top_3_coins_id[i] }}</p>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+{% else %}
+    <p>No market trends data available.</p>
+{% endif %}
 </div>
 {% endblock %}
 

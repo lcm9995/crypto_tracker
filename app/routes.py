@@ -1,7 +1,9 @@
-from flask import Blueprint, render_template, request, flash, redirect, url_for, session
+from flask import Blueprint, render_template, request, flash, redirect, url_for, session, jsonify
 import bcrypt
 import requests
 import sqlite3
+from market_trends import get_market_trends
+from price_search import get_crypto_price
 
 # Create a Blueprint
 app_routes = Blueprint("app_routes", __name__)
@@ -10,7 +12,8 @@ def get_db():
     return conn 
 @app_routes.route('/')
 def index():
-    return render_template('home.html') 
+    trends_data = get_market_trends()
+    return render_template('home.html', trends=trends_data) 
 
 @app_routes.route('/register', methods=['GET', 'POST'])
 def register():
@@ -58,39 +61,11 @@ def login():
 
     return render_template('login.html')
 # Function to fetch cryptocurrency price
-def get_crypto_price(s_query):
-    search_url = f"https://api.coingecko.com/api/v3/search?query={s_query}"
-    headers = {"accept": "application/json"}
-    response = requests.get(search_url, headers=headers)
-
-    if response.status_code == 200:
-        search_data = response.json()
-        coins = search_data.get('coins', [])
-
-        if coins:
-            coin_id = coins[0]['id']
-            price_url = f"https://api.coingecko.com/api/v3/simple/price?ids={coin_id}&vs_currencies=usd"
-            price_response = requests.get(price_url)
-
-            if price_response.status_code == 200:
-                price_data = price_response.json()
-                return {
-                    "name": coins[0]['name'],
-                    "symbol": coins[0]['symbol'],
-                    "price": price_data[coin_id]['usd']
-                }
-            else:
-                flash(f"Error fetching price: {price_response.text}", "danger")
-        else:
-            flash("No coins found. Please try another query.", "warning")
-    else:
-        flash(f"Error during search: {response.text}", "danger")
-    return None
 
 # Routes
-@app_routes.route("/")
+""" @app_routes.route("/")
 def home():
-    return render_template("home.html")
+    return render_template("home.html") """
 
 '''@app_routes.route('/search', methods=['GET', 'POST'])
 def search():
@@ -142,12 +117,14 @@ def search():
 def results():
         query = request.args.get('query')
         if query:
+            print("Got query")
             # First API call to search for the cryptocurrency
             search_url = f"https://api.coingecko.com/api/v3/search?query={query}"
             headers = {"accept": "application/json"}
             response = requests.get(search_url, headers=headers)
             
             if response.status_code == 200:
+                print("Respons status = 200")
                 search_data = response.json()
                 coins = search_data.get('coins', [])
                 
@@ -157,6 +134,7 @@ def results():
                 price_response = requests.get(price_url)
 
                 if price_response.status_code == 200:
+                    print("Price response status is 200")
                     price_data = price_response.json()
                     # Merge the price data with coin details
                     for coin in coins:
@@ -170,7 +148,35 @@ def results():
                 error_message = f"Error fetching search data: {response.status_code}"
                 return render_template('results.html', error_message=error_message)
         else:
+            print("No query")
             return render_template('results.html', error_message="No query provided.") 
+@app_routes.route('/coin/<coin_id>', methods=['GET'])
+def coin_details(coin_id):
+    # Fetch normal coin data by ID
+    coin_data_url = f"https://api.coingecko.com/api/v3/coins/{coin_id}"
+    coin_data_response = requests.get(coin_data_url)
+    coin_data = coin_data_response.json() if coin_data_response.status_code == 200 else {}
+
+    # Fetch BTC to currency exchange rate for that coin
+    exchange_rates_url = f"https://api.coingecko.com/api/v3/exchange_rates"
+    exchange_rates_response = requests.get(exchange_rates_url)
+    exchange_rates = exchange_rates_response.json().get('rates', {}) if exchange_rates_response.status_code == 200 else {}
+
+    btc_to_coin = exchange_rates.get(coin_id, {}).get('value', 'N/A')  # BTC exchange rate for the coin
+
+    # Fetch historical chart data for that coin (e.g., last 30 days)
+
+    historical_data_url = f"https://api.coingecko.com/api/v3/coins/{coin_id}/market_chart?vs_currency=usd&days=7"
+    historical_data_response = requests.get(historical_data_url)
+    historical_data = historical_data_response.json() if historical_data_response.status_code == 200 else {}
+
+    # Pass all the data to the template
+    return render_template(
+        'coin_details.html',
+        coin_data= coin_data,
+        historical_data= historical_data,
+        exchange_rates=exchange_rates,
+    )
 
 @app_routes.route('/test')
 def test():

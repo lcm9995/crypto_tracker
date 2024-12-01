@@ -10,7 +10,7 @@
 
     <h2>Search Results</h2>
 
-    {% if search_results %}
+    {% if coins %}
         <table class="table table-striped">
             <thead>
                 <tr>
@@ -20,12 +20,17 @@
                 </tr>
             </thead>
             <tbody>
-                {% for coin in search_results %}
-                    <tr>
-                        <td>{{ coin.name }}</td>
-                        <td>{{ coin.symbol }}</td>
-                        <td>${{ coin.price }}</td>
-                    </tr>
+                {% for coin in coins %}
+                    
+                        <tr>
+                            <td>
+                                <a href="/coin/{{ coin.id }}" class="text-decoration-none">
+                                    {{ coin.name }}
+                                </a>
+                            </td>
+                            <td>{{ coin.symbol }}</td>
+                            <td>${{ coin.price }}</td>
+                        </tr>
                 {% endfor %}
             </tbody>
         </table>
