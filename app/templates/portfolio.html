@@ -1,26 +1,29 @@
 {% extends 'base.html' %}
 
-{% block title %}Portfolio | Crypto Tracker{% endblock %}
 
-{% block content %}
-<h2>Your Portfolio</h2>
-<table class="table table-striped">
-    <thead>
-        <tr>
-            <th>Cryptocurrency</th>
-            <th>Quantity</th>
-            <th>Total Value (USD)</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for entry in portfolio %}
-        <tr>
-            <td>{{ entry.crypto_name }}</td>
-            <td>{{ entry.quantity }}</td>
-            <td>${{ entry.total_value }}</td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
-<a class="btn btn-primary" href="/add">Add New Entry</a>
-{% endblock %}
+<div class="container mt-5">
+    <h1>Your Portfolio</h1>
+
+    {% if portfolio_entries %}
+        <div class="row">
+            {% for entry in portfolio_entries %}
+                <div class="col-md-4 mb-4">
+                    <div class="card shadow-sm">
+                        <div class="card-header">
+                            <h5 class="card-title">{{ entry['currency_name'] }} ({{ entry['symbol'] }})</h5>
+                        </div>
+                        <div class="card-body">
+                            <p><strong>Quantity:</strong> {{ entry['total_quantity'] }}</p>
+                            <p><strong>Buy Price:</strong> ${{ entry['average_buy_price'] }}</p>
+                            <p><strong>Total Value:</strong> ${{ entry['total_quantity'] * entry['average_buy_price'] }}</p>
+                            <a href="{{ url_for('app_routes.coin_details', coin_id=entry['crypto_id']) }}" class="btn btn-primary">View Coin</a>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p>You don't have any coins in your portfolio yet.</p>
+    {% endif %}
+</div>
+<a class="btn btn-primary" href="/add_to_portfolio">Add New Entry</a>

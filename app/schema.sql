@@ -9,11 +9,7 @@ CREATE TABLE IF NOT EXISTS Users (
 CREATE TABLE IF NOT EXISTS Cryptocurrencies (
     crypto_id TEXT PRIMARY KEY,
     currency_name TEXT NOT NULL,
-    symbol TEXT NOT NULL,
-    curr_price REAL,
-    market_cap REAL,
-    volume REAL,
-    last_updated TIMESTAMP
+    symbol TEXT NOT NULL
 );
 CREATE TABLE IF NOT EXISTS Fave_Cryptocurrencies (
     user_id INTEGER,
@@ -27,7 +23,7 @@ CREATE TABLE IF NOT EXISTS Fave_Cryptocurrencies (
 CREATE TABLE IF NOT EXISTS Portfolio (
     portfolio_id INTEGER PRIMARY KEY AUTOINCREMENT,
     user_id INT NOT NULL UNIQUE,
-    FOREIGN KEY (user_id) REFERENCES User(user_id) ON DELETE CASCADE
+    FOREIGN KEY (user_id) REFERENCES Users(user_id) ON DELETE CASCADE
 );
 CREATE TABLE IF NOT EXISTS PortfolioEntry (
     entry_id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -36,7 +32,7 @@ CREATE TABLE IF NOT EXISTS PortfolioEntry (
     quantity REAL NOT NULL,
     buy_price REAL,
     date_bought TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users(user_id),
+    FOREIGN KEY (user_id) REFERENCES Users(user_id),
     FOREIGN KEY (crypto_id) REFERENCES cryptocurrencies(crypto_id)
 );
 

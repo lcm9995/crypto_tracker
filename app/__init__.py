@@ -2,6 +2,7 @@ from flask import Flask, g
 import sqlite3
 import os
 
+
 DATABASE = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'crypto_tracker.db')
 
 def get_db():

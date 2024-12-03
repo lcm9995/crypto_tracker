@@ -1,15 +1,27 @@
-from flask import Blueprint, render_template, request, flash, redirect, url_for, session, jsonify
+from flask import Flask, Blueprint, render_template, request, flash, redirect, url_for, session, jsonify
 import bcrypt
 import requests
 import sqlite3
+import os
 from market_trends import get_market_trends
 from price_search import get_crypto_price
+from dotenv import load_dotenv
 
+load_dotenv()
+app = Flask(__name__)
+app.config['TEMPLATES_AUTO_RELOAD'] = True
 # Create a Blueprint
 app_routes = Blueprint("app_routes", __name__)
+
+
+@app.context_processor
+def inject_session():
+    user_id = 'user_id' in session
+    return dict(user_id = user_id)
 def get_db():
-    conn = sqlite3.connect('crypto_tracker.db')
-    return conn 
+    conn = sqlite3.connect('app/crypto_tracker.db')
+    conn.row_factory = sqlite3.Row
+    return conn
 @app_routes.route('/')
 def index():
     trends_data = get_market_trends()
@@ -22,7 +34,7 @@ def register():
         email = request.form['email']
         password = request.form['password']
         db = get_db()
-        user_check = db.execute("SELECT * FROM users WHERE username = ? OR email = ?", (username, email)).fetchone()
+        user_check = db.execute("SELECT * FROM Users WHERE username = ? OR email = ?", (username, email)).fetchone()
 
         if user_check:
             # If user exists with the same username or email, show an error message
@@ -36,28 +48,40 @@ def register():
         #conn = get_db()
         db.execute('INSERT INTO users (username, email, pword) VALUES (?, ?, ?)', (username, email, hashed_password))
         db.commit()
+
+        user_id = db.execute('SELECT user_id FROM users WHERE username = ? AND email = ?', (username, email)).fetchone()[0]
+
+        # Initialize an empty portfolio for the new user
+        db.execute('INSERT INTO Portfolio (user_id) VALUES (?)', (user_id,))
+        db.commit()
+
         flash('Registration successful!', 'success')
         return redirect(url_for('app_routes.login'))
 
     return render_template('register.html')
+@app_routes.route('/get_login', methods=['GET'])
+def get_login():
+    return render_template('login.html')
 
 @app_routes.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        #email = request.form['email']
         username = request.form['username']
         password = request.form['password']
 
         conn = get_db()
-        user = conn.execute('SELECT * FROM users WHERE username = ?', (username,)).fetchone()
+        try:
+            user = conn.execute('SELECT * FROM users WHERE username = ?', (username,)).fetchone()
+        except Exception as e:
+            flash(f'An error occurred: {e}', 'error')
+            return redirect('/login')
 
-        if user and bcrypt.checkpw(password.encode('utf-8'), user['password']):
-            session['user_id'] = user['id']
+        if user and bcrypt.checkpw(password.encode('utf-8'), user['pword']):  # Use correct column name
+            session['user_id'] = user['user_id']
             flash('Login successful!', 'success')
-            return redirect(url_for('dashboard'))  # Redirect to a protected route, like a dashboard
+            return redirect("/")  # Redirect to a protected route, like a dashboard
         else:
             flash('Invalid credentials. Please try again.', 'error')
-            return redirect(url_for('login'))
 
     return render_template('login.html')
 # Function to fetch cryptocurrency price
@@ -149,7 +173,48 @@ def results():
                 return render_template('results.html', error_message=error_message)
         else:
             print("No query")
-            return render_template('results.html', error_message="No query provided.") 
+            return render_template('search.html', error_message="No query provided.") 
+@app_routes.route('/portfolio')
+def portfolio():
+    if 'user_id' not in session:
+        flash('Please log in to view your portfolio.', 'danger')
+        return redirect(url_for('app_routes.login'))
+    
+    db = get_db()
+    user_id = session['user_id']  # Get the current logged-in user's ID
+    
+    # Get the aggregated portfolio data: total quantity and average price per cryptocurrency
+    portfolio_data = db.execute("""
+        SELECT crypto_id, SUM(quantity) AS total_quantity, AVG(buy_price) AS average_buy_price
+        FROM PortfolioEntry
+        WHERE user_id = ?
+        GROUP BY crypto_id
+    """, (user_id,)).fetchall()
+    
+    # Now, you need to fetch the coin details (like name, symbol) to display them
+    coin_details = {}
+    for entry in portfolio_data:
+        coin = db.execute("SELECT currency_name, symbol FROM Cryptocurrencies WHERE crypto_id = ?", (entry['crypto_id'],)).fetchone()
+        coin_details[entry['crypto_id']] = coin
+    
+    return render_template('portfolio.html', portfolio_entries=portfolio_data, coin_details=coin_details)
+""" @app_routes.route('/portfolio')
+def portfolio():
+    if 'user_id' not in session:
+        flash('Please log in to view your portfolio.', 'danger')
+        return redirect(url_for('app_routes.login'))
+    db = get_db()
+    user_id = session['user_id']  # Get the current logged-in user's ID
+    print("User ID: " + user_id)
+    portfolio_data = db.execute('SELECT * FROM PortfolioEntry WHERE user_id = ?', (user_id,)).fetchall()
+    
+    return render_template('portfolio.html', portfolio_entries=portfolio_data) """
+@app_routes.route('/logout')
+def logout():
+    session.pop('user_id', None)  # Remove the user_id from session
+    flash('You have been logged out.', 'info')
+    return redirect('/login')
+
 @app_routes.route('/coin/<coin_id>', methods=['GET'])
 def coin_details(coin_id):
     # Fetch normal coin data by ID
@@ -177,6 +242,190 @@ def coin_details(coin_id):
         historical_data= historical_data,
         exchange_rates=exchange_rates,
     )
+def fetch_coin_details_from_api(coin_id):
+    api_url = f'https://api.coingecko.com/api/v3/coins/{coin_id}'
+    response = requests.get(api_url)
+    if response.status_code == 200:
+        print("fetcg coin details status code = 200!!")
+        coin_data = response.json()
+        return {
+            'id': coin_data['id'],
+            'name': coin_data['name'],
+            'symbol': coin_data['symbol'].upper(),
+            'current_price': coin_data['market_data']['current_price']['usd'],
+            'market_cap': coin_data['market_data']['market_cap']['usd'],
+            'volume': coin_data['market_data']['total_volume']['usd'],
+            'last_updated': coin_data['last_updated']
+        }
+    return None
+@app_routes.route('/coin/<coin_id>/add_to_portfolio', methods=['GET', 'POST'])
+def add_to_portfolio(coin_id):
+    # Check if the user is logged in
+    if 'user_id' not in session:
+        flash('You must be logged in to add to your portfolio.', 'danger')
+        return redirect('/login')
+
+    user_id = session['user_id']
+    db = get_db()
+
+    # Get the coin details from the database (only static data)
+    coin = db.execute("SELECT * FROM Cryptocurrencies WHERE crypto_id = ?", (coin_id,)).fetchone()
+    
+    if not coin:
+        print("not coin")
+        # Fetch real-time coin data from the API
+        coin_details = fetch_coin_details_from_api(coin_id)
+        if coin_details:
+            print("got coin details")
+            # You could add static data to your DB if needed, but not dynamic data
+            db.execute("""
+                INSERT INTO Cryptocurrencies (crypto_id, currency_name, symbol)
+                VALUES (?, ?, ?)""",
+                       (coin_details['id'], coin_details['name'], coin_details['symbol']))
+            db.commit()
+            coin = db.execute("SELECT * FROM Cryptocurrencies WHERE crypto_id = ?", (coin_id,)).fetchone()
+        else:
+            print("couldn't get coin details")
+            flash('Unable to fetch cryptocurrency details.', 'danger')
+            return redirect('/')
+
+    if request.method == 'POST':
+        print("request method == post")
+        quantity = request.form['quantity']
+        try:
+            quantity = float(quantity)  # Make sure the quantity is a number
+        except ValueError:
+            print("Value error for quantity ")
+            flash('Please enter a valid quantity.', 'danger')
+            return redirect(f'/coin/{coin_id}/add_to_portfolio')
+
+        # Fetch real-time data again to get the latest price, market cap, etc.
+        coin_details = fetch_coin_details_from_api(coin_id)
+
+        # Add the portfolio entry with the real-time price data
+        db.execute("""
+            INSERT INTO PortfolioEntry (user_id, crypto_id, quantity, buy_price)
+            VALUES (?, ?, ?, ?)""", (user_id, coin_id, quantity, coin_details['current_price']))
+        db.commit()
+        print("successfully added to portfolio")
+        flash(f'Added {quantity} of {coin_details["name"]} to your portfolio!', 'success')
+        return redirect('/portfolio')  # Redirect to the portfolio page
+    print("request method == get")
+    return render_template('add_to_portfolio.html', coin_data=coin)
+
+""" @app_routes.route('/coin/<coin_id>/add_to_portfolio', methods=['GET', 'POST'])
+def add_to_portfolio(coin_id):
+    print("In add_to_portfolio route")
+
+    # Check if the user is logged in
+    if 'user_id' not in session:
+        flash('You must be logged in to add to your portfolio.', 'danger')
+        return redirect('/login')
+
+    user_id = session['user_id']
+    db = get_db()
+
+    # Get coin details
+    coin = db.execute("SELECT * FROM Cryptocurrencies WHERE crypto_id = ?", (coin_id,)).fetchone()
+    if not coin:
+        # Fetch and insert the coin details if it doesn't exist
+        coin_details = fetch_coin_details_from_api(coin_id)  # Replace with actual API fetch logic
+        if coin_details:
+            db.execute()
+                INSERT INTO Cryptocurrencies (crypto_id, currency_name, symbol, curr_price, market_cap, volume, last_updated)
+                VALUES (?, ?, ?, ?, ?, ?, ?),
+                       (coin_details['id'], coin_details['name'], coin_details['symbol'], 
+                        coin_details['current_price'], coin_details['market_cap'], 
+                        coin_details['volume'], coin_details['last_updated']))
+            db.commit()
+            coin = db.execute("SELECT * FROM Cryptocurrencies WHERE crypto_id = ?", (coin_id,)).fetchone()
+        else:
+            flash('Unable to fetch cryptocurrency details.', 'danger')
+            return redirect('/')
+
+    if request.method == 'POST':
+        # Process form submission
+        quantity = request.form.get('quantity', '').strip()
+        try:
+            quantity = float(quantity)
+        except ValueError:
+            flash('Please enter a valid quantity.', 'danger')
+            return redirect(url_for('app_routes.add_to_portfolio', coin_id=coin_id))
+
+        # Add portfolio entry
+        portfolio = db.execute("SELECT * FROM Portfolio WHERE user_id = ?", (user_id,)).fetchone()
+        if not portfolio:
+            db.execute('INSERT INTO Portfolio (user_id) VALUES (?)', (user_id,))
+            db.commit()
+
+        db.execute(
+            INSERT INTO PortfolioEntry (user_id, crypto_id, quantity, buy_price)
+            VALUES (?, ?, ?, ?), (user_id, coin_id, quantity, coin['curr_price']))
+        db.commit()
+
+        flash(f'Added {quantity} of {coin["currency_name"]} to your portfolio!', 'success')
+        return redirect('/portfolio')
+
+    # Render a form page if GET method
+    return render_template('add_to_portfolio.html', coin=coin) """
+
+
+""" @app_routes.route('/coin/<coin_id>/add_to_portfolio', methods=['GET', 'POST'])
+def add_to_portfolio(coin_id):
+    print("In add to portfolio route")
+    # Check if the user is logged in
+    if 'user_id' not in session:
+        flash('You must be logged in to add to your portfolio.', 'danger')
+        return redirect('/login')
+
+    user_id = session['user_id']
+    db = get_db()
+
+    # Get the coin details
+    coin = db.execute("SELECT * FROM Cryptocurrencies WHERE crypto_id = ?", (coin_id,)).fetchone()
+    
+    if not coin:
+        coin_details = fetch_coin_details_from_api(coin_id)  # Replace with actual API fetch logic
+        if coin_details:
+            db.execute(
+                INSERT INTO Cryptocurrencies (crypto_id, currency_name, symbol, curr_price, market_cap, volume, last_updated)
+                VALUES (?, ?, ?, ?, ?, ?, ?),
+                       (coin_details['id'], coin_details['name'], coin_details['symbol'], 
+                        coin_details['current_price'], coin_details['market_cap'], 
+                        coin_details['volume'], coin_details['last_updated']))
+            db.commit()
+            coin = db.execute("SELECT * FROM Cryptocurrencies WHERE crypto_id = ?", (coin_id,)).fetchone()
+        else:
+            print("No coin details")
+            flash('Unable to fetch cryptocurrency details.', 'danger')
+            return redirect('/')
+
+    if request.method == 'POST':
+        quantity = request.form['quantity']
+        try:
+            quantity = float(quantity)  # Make sure the quantity is a number
+        except ValueError:
+            flash('Please enter a valid quantity.', 'danger')
+            return redirect('/'+coin_id + '/add_to_portfolio')
+
+        # Check if a portfolio already exists for this user
+        portfolio = db.execute("SELECT * FROM Portfolio WHERE user_id = ?", (user_id,)).fetchone()
+        if not portfolio:
+            # Create a new portfolio if it doesn't exist
+            db.execute('INSERT INTO Portfolio (user_id) VALUES (?)', (user_id,))
+            db.commit()
+
+        # Add the portfolio entry to the database
+        db.execute(
+            INSERT INTO PortfolioEntry (user_id, crypto_id, quantity, buy_price)
+            VALUES (?, ?, ?, ?), (user_id, coin_id, quantity, coin['curr_price']))
+        db.commit()
+
+        flash(f'Added {quantity} of {coin["currency_name"]} to your portfolio!', 'success')
+        return redirect('/portfolio')  # Redirect to the portfolio page
+
+    #return render_template('portfolio.html')
+    return redirect('/portfolio') """
 
 @app_routes.route('/test')
 def test():

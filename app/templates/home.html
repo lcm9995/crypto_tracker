@@ -21,7 +21,7 @@
         </div>
     </div>
 </div>
-    <h2 class="subheader">Market Trends</h2>
+    <h2 class="subheader">Coins by Category</h2>
     <!--<h1>Market Trends (By Category) </h1>-->
 
     {% if trends %}
@@ -32,7 +32,6 @@
                     <div class="card h-100">
                         <div class="card-body text-center">
                             <h5 class="card-title">{{ trend.name }}</h5>
-                            
                             <p class="card-text">
                                 <strong>Market Cap:</strong> 
                                 {% if trend.market_cap %}
@@ -70,7 +69,8 @@
                             <div class="d-flex justify-content-center">
                                 {% for i in range(3) %}
                                     <div class="me-3">
-                                        <a href="https://www.coingecko.com/en/coins/{{ trend.top_3_coins_id[i] }}" target="_blank">
+                                        <a href="{{ url_for('app_routes.coin_details', coin_id=trend.top_3_coins_id[i]) }}" target="_blank">
+                                        <!--<a href="https://www.coingecko.com/en/coins/{{ trend.top_3_coins_id[i] }}" target="_blank">-->
                                             <img src="{{ trend.top_3_coins[i] }}" alt="{{ trend.top_3_coins_id[i] }}" width="50" height="50">
                                         </a>
                                         <p>{{ trend.top_3_coins_id[i] }}</p>
