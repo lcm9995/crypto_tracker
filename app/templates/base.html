@@ -14,16 +14,10 @@
 
     <style>
         /* Fix the navbar to the top of the page */
-
-        /* Ensure the navbar links are also pink */
-        
-        /* Make sure buttons with the 'btn' class have pink text */
         .btn {
-            color: hotpink !important;
+            background-color: green;
+            color: white;
         }
-
-        /* Ensure card titles have pink text */
-        /* Override any default bootstrap styles that may affect colors */
         .navbar {
             position: fixed;
             top: 0;
@@ -31,10 +25,9 @@
             right: 0;
             z-index: 1030; /* Ensure it's above other content */
         }
-
         /* Add padding to the body so that it doesn't get hidden behind the navbar */
         body {
-            padding-top: 70px; /* Adjust this depending on the height of your navbar */
+            padding-top: 70px; /* Adjust depending on height of navbar*/
         }
 
         /* Make the main content area scrollable if it's too long */
@@ -68,6 +61,54 @@
         }
         #searchButton {
             background-color: green;
+        }
+        .input-group {
+    max-width: 500px;
+    margin: 0 auto;
+        }
+
+        /* Card styling */
+        .card {
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            overflow: hidden;
+            transition: transform 0.3s ease-in-out;
+        }
+
+        .card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .card-img-top {
+            max-height: 200px;
+            object-fit: cover;
+            width: 100%;
+        }
+
+        .card-body {
+            padding: 15px;
+        }
+
+        .card-title {
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+
+        .card-text {
+            font-size: 1em;
+            margin-bottom: 10px;
+        }
+
+        /* Button styling */
+        .btn-primary {
+            background-color: #0069d9;
+            border-color: #0062cc;
+        }
+
+        .btn-primary:hover {
+            background-color: #0056b3;
+            border-color: #004085;
         }
 
     </style>

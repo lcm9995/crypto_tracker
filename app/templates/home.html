@@ -3,8 +3,9 @@
 {% block title %}Home - Crypto Tracker{% endblock %}
 
 {% block content %}
+<div class="everything">
 <div class="text-center">
-    <h1>Welcome to Crypto Tracker</h1>
+    <h1>Welcome to Crypto Tracker{% if user_name %}, {{ user_name }}{% endif %}!</h1>
     <p>Track cryptocurrency prices, manage your portfolio, and stay up to date with the latest news.</p>
     <h2 class = "subheader">Coin Search</h2>
     <div class="container mt-4">
@@ -21,72 +22,97 @@
         </div>
     </div>
 </div>
-    <h2 class="subheader">Coins by Category</h2>
-    <!--<h1>Market Trends (By Category) </h1>-->
-
-    {% if trends %}
-    <div class="container">
-        <div class="row">
-            {% for trend in trends %}
-                <div class="col-md-4 mb-4">  <!-- Bootstrap grid, 3 cards per row on medium screens -->
-                    <div class="card h-100">
-                        <div class="card-body text-center">
-                            <h5 class="card-title">{{ trend.name }}</h5>
-                            <p class="card-text">
-                                <strong>Market Cap:</strong> 
-                                {% if trend.market_cap %}
-                                    ${{ '{:,.2f}'.format(trend.market_cap) }}
-                                {% else %}
-                                    Data not available
-                                {% endif %}
-                            </p>
-                            
-                            <p class="card-text">
-                                <strong>Market Cap Change (24h):</strong> 
-                                {% if trend.market_cap_change_24h is not none %}
-                                    <span class="{{ 'text-success' if trend.market_cap_change_24h >= 0 else 'text-danger' }}">
-                                        {{ trend.market_cap_change_24h | round(2) }}%
-                                    </span>
-                                {% else %}
-                                    Data not available
-                                {% endif %}
-                            </p>
-
-                            <p class="card-text">
-                                <strong>24h Volume:</strong> 
-                                {% if trend.volume_24h %}
-                                    ${{ '{:,.2f}'.format(trend.volume_24h) }}
-                                {% else %}
-                                    Data not available
-                                {% endif %}
-                            </p>
-
-                            <p class="card-text">
-                                <strong>Last Updated:</strong> {{ trend.updated_at }}
-                            </p>
-
-                            <h6>Top 3 Coins:</h6>
-                            <div class="d-flex justify-content-center">
-                                {% for i in range(3) %}
-                                    <div class="me-3">
-                                        <a href="{{ url_for('app_routes.coin_details', coin_id=trend.top_3_coins_id[i]) }}" target="_blank">
-                                        <!--<a href="https://www.coingecko.com/en/coins/{{ trend.top_3_coins_id[i] }}" target="_blank">-->
-                                            <img src="{{ trend.top_3_coins[i] }}" alt="{{ trend.top_3_coins_id[i] }}" width="50" height="50">
-                                        </a>
-                                        <p>{{ trend.top_3_coins_id[i] }}</p>
-                                    </div>
-                                {% endfor %}
-                            </div>
-                        </div>
-                    </div>
+{% if not is_logged_in %}
+        <div class="text-center my-4">
+            <div class="text-center my-4">
+                <a href="{{ url_for('app_routes.register') }}" class="btn btn-primary mr-2">Register</a>
+                <a href="{{ url_for('app_routes.login') }}" class="btn btn-secondary">Login</a>
+            </div>
+        </div>
+{% endif %}
+    <div class="market-data my-4 p-4 shadow-sm">
+        <h2 class="subheader">Market Overview</h2>
+        <p><strong>Total Market Cap:</strong> ${{ market_data.total_market_cap }}</p>
+        <p><strong>24h Volume:</strong> ${{ market_data.volume_24h }}</p>
+        <p><strong>Bitcoin Dominance:</strong> {{ market_data.bitcoin_dominance }}%</p>
+    </div>
+    <h2 class="subheader">Browse Coins Options</h2>
+    <div class="row mt-5">
+        <div class="col-md-4">
+            <div class="card shadow-sm">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Browse by Category</h5>
+                    <p class="card-text">Discover coins grouped by categories.</p>
+                    <a href="{{ url_for('app_routes.browse_by_categories') }}" class="btn btn-primary">Browse</a>
                 </div>
-            {% endfor %}
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card shadow-sm">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Browse Most Popular Coins</h5>
+                    <p class="card-text">Explore coins with the highest market caps.</p>
+                    <a href="{{ url_for('app_routes.browse_popular_coins') }}" class="btn btn-primary">Explore</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card shadow-sm">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Browse by Name</h5>
+                    <p class="card-text">Find coins by name or symbol.</p>
+                    <a href="{{ url_for('app_routes.browse_by_name') }}" class="btn btn-primary">Search</a>
+                </div>
+            </div>
         </div>
     </div>
-{% else %}
-    <p>No market trends data available.</p>
-{% endif %}
 </div>
 {% endblock %}
+<style>
+    .browse-options .card {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    margin-bottom: 30px;  /* Add margin-bottom to space out the cards */
+    transition: transform 0.3s ease-in-out;
+}
+.everything {
+    margin-bottom: 40px;
+    padding-bottom: 20px;
 
+}
+.browse-options .card:hover {
+    transform: scale(1.05);
+}
+
+.browse-options .card-body {
+    text-align: center;
+}
+
+.browse-options .card-title {
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.browse-options .card-text {
+    font-size: 14px;
+    color: #6c757d;
+}
+
+.browse-options .btn-primary {
+    background-color: #007bff;
+    border: none;
+    margin-top: 10px;
+}
+
+.browse-options .btn-primary:hover {
+    background-color: #0056b3;
+}
+
+/* Padding beneath the browse cards */
+.browse-options .row {
+    margin-bottom: 40px; /* Add more space beneath the row of cards */
+}
+</style>
 

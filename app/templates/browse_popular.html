@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1>Trending Coins</h1>
+    {% if coins %}
+        <div class="row">
+            {% for coin in coins %}
+                <div class="col-md-4 mb-4">
+                    <div class="card shadow-sm">
+                        <img src="{{ coin['item']['large'] }}" class="card-img-top" alt="{{ coin['item']['name'] }}">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ coin['item']['name'] }}</h5>
+                            <p class="card-text">{{ coin['item']['symbol'].upper() }}</p>
+                            <p><strong>Current Price:</strong> ${{ coin['item']['price_btc'] | round(4) }}</p>
+                            <a href="{{ url_for('app_routes.coin_details', coin_id=coin['item']['id']) }}" class="btn btn-primary">View Coin</a>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p>No popular coins found.</p>
+    {% endif %}
+</div>
+{% endblock %}

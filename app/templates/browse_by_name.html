@@ -1,0 +1,127 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1>Browse Coins by Name</h1>
+
+    <div class="alphabet-navigation mb-4">
+        <ul class="list-inline">
+            {% for letter in 'ABCDEFGHIJKLMNOPQRSTUVWXYZ' %}
+            <li class="list-inline-item">
+                <a href="#{{ letter }}" class="btn btn-outline-primary">{{ letter }}</a>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <div class="coins-list">
+        {% for letter in 'ABCDEFGHIJKLMNOPQRSTUVWXYZ' %}
+        <div id="{{ letter }}" class="letter-group mb-4">
+            <h3>{{ letter }}</h3>
+            <div class="scrollable-container">
+                <div class="row">
+                    {% for coin in coins %}
+                        {% if coin.name[0].upper() == letter %}
+                        <div class="col-md-3 mb-4">
+                            <div class="card">
+                                <img src="{{ coin.image }}" class="card-img-top" alt="{{ coin.name }}">
+                                <div class="card-body">
+                                    <h5 class="card-title">{{ coin.name }}</h5>
+                                    <p class="card-text">{{ coin.symbol | upper }}</p>
+                                    <a href="{{ url_for('app_routes.coin_details', coin_id=coin.id) }}" class="btn btn-primary">View Coin</a>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
+
+
+
+<style>
+    /* Scrollable Container */
+    /* Style for Alphabet Navigation */
+    .alphabet-navigation ul {
+        padding: 0;
+        text-align: center;
+    }
+
+    .alphabet-navigation li {
+        display: inline;
+        margin-right: 10px;
+    }
+
+    .alphabet-navigation a {
+        font-size: 16px;
+        padding: 8px 12px;
+    }
+
+    /* Style for Card Layout */
+    .coins-list .letter-group {
+        margin-bottom: 30px;
+    }
+
+    .coins-list .card {
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        transition: transform 0.3s ease-in-out;
+        height: 300px;  /* Set height to make sure all cards are uniform */
+    }
+
+    .coins-list .card:hover {
+        transform: scale(1.05);
+    }
+
+    .coins-list .card-body {
+        text-align: center;
+    }
+
+    .coins-list .card-title {
+        font-size: 18px;
+        font-weight: bold;
+        margin-top: 10px;
+    }
+
+    .coins-list .card-text {
+        font-size: 14px;
+        color: #6c757d;
+    }
+
+    .coins-list .btn-primary {
+        width: 100%;
+        background-color: #007bff;
+        border: none;
+        margin-top: 10px;
+    }
+
+    .coins-list .btn-primary:hover {
+        background-color: #0056b3;
+    }
+
+    /* Scrollable container for each letter group */
+    .scrollable-container {
+        max-height: 500px; /* Set a max height for scrolling */
+        overflow-y: auto;  /* Allow vertical scrolling */
+    }
+
+    /* Optional: Add custom styling for the scroll bar */
+    .scrollable-container::-webkit-scrollbar {
+        width: 8px;
+    }
+
+    .scrollable-container::-webkit-scrollbar-thumb {
+        background-color: #007bff;
+        border-radius: 4px;
+    }
+
+    .scrollable-container::-webkit-scrollbar-track {
+        background-color: #f1f1f1;
+    }
+
+</style>

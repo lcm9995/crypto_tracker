@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2 class="subheader">Coins by Category</h2>
+
+{% if trends %}
+<div class="container">
+    <div class="row">
+        {% for trend in trends %}
+            <div class="col-md-4 mb-4">  <!-- Bootstrap grid, 3 cards per row on medium screens -->
+                <div class="card h-100">
+                    <div class="card-body text-center">
+                        <h5 class="card-title">{{ trend.name }}</h5>
+                        <p class="card-text">
+                            <strong>Market Cap:</strong> 
+                            {% if trend.market_cap %}
+                                ${{ '{:,.2f}'.format(trend.market_cap) }}
+                            {% else %}
+                                Data not available
+                            {% endif %}
+                        </p>
+                        
+                        <p class="card-text">
+                            <strong>Market Cap Change (24h):</strong> 
+                            {% if trend.market_cap_change_24h is not none %}
+                                <span class="{{ 'text-success' if trend.market_cap_change_24h >= 0 else 'text-danger' }}">
+                                    {{ trend.market_cap_change_24h | round(2) }}%
+                                </span>
+                            {% else %}
+                                Data not available
+                            {% endif %}
+                        </p>
+
+                        <p class="card-text">
+                            <strong>24h Volume:</strong> 
+                            {% if trend.volume_24h %}
+                                ${{ '{:,.2f}'.format(trend.volume_24h) }}
+                            {% else %}
+                                Data not available
+                            {% endif %}
+                        </p>
+
+                        <p class="card-text">
+                            <strong>Last Updated:</strong> {{ trend.updated_at }}
+                        </p>
+
+                        <h6>Top 3 Coins:</h6>
+                        <div class="d-flex justify-content-center">
+                            {% for i in range(3) %}
+                                <div class="me-3">
+                                    <a href="{{ url_for('app_routes.coin_details', coin_id=trend.top_3_coins_id[i]) }}" target="_blank">
+                                    <!--<a href="https://www.coingecko.com/en/coins/{{ trend.top_3_coins_id[i] }}" target="_blank">-->
+                                        <img src="{{ trend.top_3_coins[i] }}" alt="{{ trend.top_3_coins_id[i] }}" width="50" height="50">
+                                    </a>
+                                    <p>{{ trend.top_3_coins_id[i] }}</p>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+{% else %}
+    <p>No market trends data available.</p>
+{% endif %}
+</div>
+{% endblock %}
