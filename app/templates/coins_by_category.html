@@ -3,13 +3,12 @@
 {% block content %}
 
 <h2 class="subheader">Coins by Category</h2>
-    <!--<h1>Market Trends (By Category) </h1>-->
 
     {% if trends %}
     <div class="container">
         <div class="row">
             {% for trend in trends %}
-                <div class="col-md-4 mb-4">  <!-- Bootstrap grid, 3 cards per row on medium screens -->
+                <div class="col-md-4 mb-4">  
                     <div class="card h-100">
                         <div class="card-body text-center">
                             <h5 class="card-title">{{ trend.name }}</h5>

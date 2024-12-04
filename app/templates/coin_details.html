@@ -4,7 +4,6 @@
 
 {% block content %}
 <div class="container mt-5">
-    <!-- Coin Title and Image -->
     <div class="d-flex justify-content-between align-items-center mb-4">
         {% if coin_data['symbol'] %}
             <h2>{{ coin_data['name'] }} ({{ coin_data['symbol'].upper() }})</h2>
@@ -14,7 +13,6 @@
         <img src="{{ coin_data['image']['large'] }}" alt="{{ coin_data['name'] }}" class="img-fluid" style="max-width: 150px;">
     </div>
     
-    <!-- Coin Details Card -->
     <div class="card mb-4">
         <div class="card-header">
             <h5>Coin Overview</h5>
@@ -30,31 +28,18 @@
         <a href="{{ url_for('app_routes.add_to_portfolio', coin_id=coin_data['id']) }}" class="btn btn-primary mt-3">
             Add to Portfolio
         </a>
-        <!--<form method="POST" action="{{ url_for('app_routes.add_to_portfolio', coin_id=coin_data['id']) }}">
-            <div class="mb-3">
-                <label for="quantity" class="form-label">Quantity</label>
-                <input type="number" step="any" class="form-control" id="quantity" name="quantity" required>
-            </div>
-            <button type="submit" class="btn btn-primary">Add to Portfolio</button>
-
-        </form>-->
-    </div>
-
-    <!-- Historical Chart Data Section -->
     <div class="card mb-4">
         <div class="card-header">
             <h5>Price History (Last 7 Days)</h5>
         </div>
         <div class="card-body">
             {% if historical_data %}
-                <!-- Pass data as JSON to a data-* attribute -->
                 <div id="historical-data" 
                      data-historical="{{ historical_data['prices'] | tojson }}">
                 </div>
                 
                 <canvas id="priceChart"></canvas>
                 <script>
-                    // Get historical data from data attribute
                     const historicalData = JSON.parse(document.getElementById('historical-data').getAttribute('data-historical'));
 
                     const chartLabels = historicalData.map(data => {
@@ -98,7 +83,6 @@
         </div>
     </div>
 
-    <!-- Related Links or Additional Resources -->
     <div class="card mb-4">
         <div class="card-header">
             <h5>Resources</h5>

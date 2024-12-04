@@ -4,40 +4,40 @@
 
 {% block content %}
 <div class="everything">
-<div class="text-center">
-    <h1>Welcome to Crypto Tracker{% if user_name %}, {{ user_name }}{% endif %}!</h1>
-    <p>Track cryptocurrency prices, manage your portfolio, and stay up to date with the latest news.</p>
-    <h2 class = "subheader">Coin Search</h2>
-    <div class="container mt-4">
-        <div class="row">
-            <!-- Subheader for Search Section -->
-            <!-- Search Form -->
-            <form action="/results" method="GET">
-                <div class="col-12 d-flex align-items-center">
-                    <label for="crypto-query" class="form-label">Enter cryptocurrency name or symbol:</label>
-                    <input type="text" id="crypto-query" name="query" class="form-control" required>
-                    <button type="submit" class="btn btn-primary" id = "searchButton">Search</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-{% if not is_logged_in %}
-        <div class="text-center my-4">
-            <div class="text-center my-4">
-                <a href="{{ url_for('app_routes.register') }}" class="btn btn-primary mr-2">Register</a>
-                <a href="{{ url_for('app_routes.login') }}" class="btn btn-secondary">Login</a>
+    <div class="text-center">
+        <h1>Welcome to Crypto Tracker{% if user_name %}, {{ user_name }}{% endif %}!</h1>
+        <p>Track cryptocurrency prices, manage your portfolio, and stay up to date with the latest news.</p>
+        <h2 class="subheader">Coin Search</h2>
+        <div class="container mt-4">
+            <div class="row">
+                <!-- Subheader for Search Section -->
+                <!-- Search Form -->
+                <form action="/results" method="GET">
+                    <div class="col-12 d-flex align-items-center">
+                        <label for="crypto-query" class="form-label">Enter cryptocurrency name or symbol:</label>
+                        <input type="text" id="crypto-query" name="query" class="form-control" required>
+                        <button type="submit" class="btn btn-primary" id="searchButton">Search</button>
+                    </div>
+                </form>
             </div>
         </div>
-{% endif %}
-    <div class="market-data my-4 p-4 shadow-sm">
-        <h2 class="subheader">Market Overview</h2>
-        <p><strong>Total Market Cap:</strong> ${{ market_data.total_market_cap }}</p>
-        <p><strong>24h Volume:</strong> ${{ market_data.volume_24h }}</p>
-        <p><strong>Bitcoin Dominance:</strong> {{ market_data.bitcoin_dominance }}%</p>
     </div>
+    {% if not is_logged_in %}
+        <div class="text-center my-4">
+            <a href="{{ url_for('app_routes.register') }}" class="btn btn-primary mr-2">Register</a>
+            <a href="{{ url_for('app_routes.login') }}" class="btn btn-secondary">Login</a>
+        </div>
+    {% endif %}
+    <!--<div class="market-data my-4 p-4 shadow-sm">-->
+        <h2 class="subheader">Market Overview</h2>
+        <div class="market-data my-4 p-4 shadow-sm">
+            <p><strong>Total Market Cap:</strong> ${{ market_data.total_market_cap }}</p>
+            <p><strong>24h Volume:</strong> ${{ market_data.volume_24h }}</p>
+            <p><strong>Bitcoin Dominance:</strong> {{ market_data.bitcoin_dominance }}%</p>
+        </div>   
     <h2 class="subheader">Browse Coins Options</h2>
-    <div class="row mt-5">
+    <div class="row d-flex justify-content-center">
+    <div class="browse-options row mt-5">
         <div class="col-md-4">
             <div class="card shadow-sm">
                 <div class="card-body text-center">
@@ -47,7 +47,7 @@
                 </div>
             </div>
         </div>
-        <div class="col-md-4">
+        <!--<div class="col-md-4">
             <div class="card shadow-sm">
                 <div class="card-body text-center">
                     <h5 class="card-title">Browse Most Popular Coins</h5>
@@ -55,7 +55,7 @@
                     <a href="{{ url_for('app_routes.browse_popular_coins') }}" class="btn btn-primary">Explore</a>
                 </div>
             </div>
-        </div>
+        </div>-->
         <div class="col-md-4">
             <div class="card shadow-sm">
                 <div class="card-body text-center">
@@ -65,54 +65,91 @@
                 </div>
             </div>
         </div>
+    
+    </div>
     </div>
 </div>
+<div class = "empty">
+    <div class = "col-md-4">
+    <p class = "emptytxt">                                                                                        </p>
+    <p>                                        </p>
+    <h3>                                                                             </h3>
+    <p class = "emptytxt">                                                                                        </p>
+    <p class = "emptytxt">                                                                                        </p>
+    <p class = "emptytxt">                                                                                        </p>
+    <p class = "emptytxt">                                                                                        </p>
+    <p class = "emptytxt">                                                                                        </p>
+    <p class = "emptytxt">                                                                                        </p>
+</div>
+</div>
 {% endblock %}
+
 <style>
+    .empty{
+        padding: 500px;
+        margin: 700px;
+    }
+    .emptytxt{
+        padding: 500px;
+        margin: 200px
+    }
+    .everything {
+        padding-bottom: 500px;
+        margin-bottom: 500px;
+    }
+
+    .browse-options .col-md-4 {
+        margin-bottom: 30px;
+        position: center;
+    }
+
     .browse-options .card {
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    padding: 20px;
-    margin-bottom: 30px;  /* Add margin-bottom to space out the cards */
-    transition: transform 0.3s ease-in-out;
-}
-.everything {
-    margin-bottom: 40px;
-    padding-bottom: 20px;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s ease-in-out;
+    }
 
-}
-.browse-options .card:hover {
-    transform: scale(1.05);
-}
+    .browse-options .card:hover {
+        transform: scale(1.05);
+    }
 
-.browse-options .card-body {
-    text-align: center;
-}
+    .browse-options .card-body {
+        text-align: center;
+    }
 
-.browse-options .card-title {
-    font-size: 18px;
-    font-weight: bold;
-}
+    .browse-options .card-title {
+        font-size: 18px;
+        font-weight: bold;
+    }
 
-.browse-options .card-text {
-    font-size: 14px;
-    color: #6c757d;
-}
+    .browse-options .card-text {
+        font-size: 14px;
+        color: #6c757d;
+    }
 
-.browse-options .btn-primary {
-    background-color: #007bff;
-    border: none;
-    margin-top: 10px;
-}
+    .browse-options .btn-primary {
+        background-color: #007bff;
+        border: none;
+        margin-top: 10px;
+    }
 
-.browse-options .btn-primary:hover {
-    background-color: #0056b3;
-}
+    .browse-options .btn-primary:hover {
+        background-color: #0056b3;
+    }
 
-/* Padding beneath the browse cards */
-.browse-options .row {
-    margin-bottom: 40px; /* Add more space beneath the row of cards */
-}
+    /* Margin and padding adjustments */
+    .browse-options .row {
+        margin-bottom: 50px; /* Increase the margin for spacing below the cards */
+    }
+
+    .market-data {
+        margin-top: 40px;
+    }
+
+    .subheader {
+        font-size: 24px;
+        font-weight: bold;
+    }
 </style>
+
 
