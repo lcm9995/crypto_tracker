@@ -1,18 +1,19 @@
-#Crypto Tracker
+**Crypto Tracker**
+
 Crypto Tracker is a web application for monitoring real-time cryptocurrency prices, market trends, and news, powered by the CoinGecko API. Designed for crypto enthusiasts and traders, it provides an intuitive interface for staying informed and tracking investments.
 
-#Features
+**Features**
 Live cryptocurrency price updates.
 Market trends and rankings.
 Latest cryptocurrency news.
 Portfolio tracking (in progress).
 Technologies
-Frontend: HTML, CSS, JavaScript
+Frontend: HTML, CSS, JavaScript, Bootstrap 
 Backend: Python (Flask)
 API: CoinGecko
 Database: SQLite
 
-#setup instructions
+**Setup instructions**
 install dependencies:
 pip install -r requirements.txt 
 
