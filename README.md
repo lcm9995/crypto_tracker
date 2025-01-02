@@ -4,10 +4,10 @@ Crypto Tracker is a web application for monitoring real-time cryptocurrency pric
 
 **Features**
 Live cryptocurrency price updates.
-Market trends and rankings.
-Latest cryptocurrency news.
-Portfolio tracking (in progress).
+Market trends and rankings
+Portfolio tracking 
 Technologies
+Latest cryptocurrency news
 Frontend: HTML, CSS, JavaScript, Bootstrap 
 Backend: Python (Flask)
 API: CoinGecko
